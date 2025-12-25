@@ -101,14 +101,22 @@ Fetches data from the support database.
 
 ```python
 import psycopg2
+import yaml
+import os
+
+def load_database_config():
+    config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'database.yaml')
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
 
 def fetch_tickets():
-    conn = psycopg2.connect(
-        host="YOUR_DB_HOST",
-        dbname="YOUR_DB_NAME",
-        user="YOUR_DB_USER",
-        password="YOUR_DB_PASSWORD"
-    )
+    """
+    Fetch support tickets from the database.
+    Connects to the configured database service and retrieves ticket data.
+    """
+    config = load_database_config()
+    conn = psycopg2.connect(**config['database'])
+
     cur = conn.cursor()
     cur.execute("""
         SELECT id, category, message, sla_status, created_at, resolved_at
@@ -221,8 +229,8 @@ support-insights-agent/
 │   ├── db_tools.py
 │   └── report_tools.py
 │
-├── data/
-│   └── sample_tickets.csv
+├── config/
+│   └── database.yaml
 │
 ├── requirements.txt
 └── PRD.md
@@ -236,11 +244,14 @@ support-insights-agent/
 # 1. Install dependencies
 pip install google-adk psycopg2 pandas
 
-# 2. Run locally
+# 2. Configure database connection
+# Update config/database.yaml with your database credentials
+
+# 3. Run locally
 adk web
 
-# 3. Interact in browser
-> “Summarize tickets by category and SLA performance”
+# 4. Interact in browser
+> "Summarize tickets by category and SLA performance"
 ```
 
 ---
